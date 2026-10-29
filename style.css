@@ -234,6 +234,26 @@ h2 {
   margin-top: 12px;
 }
 
+.best-time {
+  margin: 16px 0;
+  padding: 12px;
+  border: 1px solid #c5dde6;
+  border-radius: 10px;
+  background: #e8f5fa;
+}
+
+.best-time strong {
+  display: block;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+}
+
+.best-time small {
+  display: block;
+  margin-top: 6px;
+  font-size: 10px;
+}
+
 .menu-card .menu-hint {
   font-size: 10px;
   line-height: 1.7;
