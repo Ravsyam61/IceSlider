@@ -38,7 +38,7 @@ const semuaLevel = [level1, level2, level3];
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const ukuranTile = 64;
-const kecepatan = 320; // Piksel per detik, sekitar 5 tile per detik.
+const kecepatan = 320;
 const levelText = document.getElementById("levelText");
 const timerText = document.getElementById("timerText");
 const hpText = document.getElementById("hpText");
@@ -52,6 +52,8 @@ const menuEyebrow = document.getElementById("menuEyebrow");
 const menuDescription = document.getElementById("menuDescription");
 const menuButton = document.getElementById("menuButton");
 const menuHint = document.getElementById("menuHint");
+const bestTimePanel = document.getElementById("bestTimePanel");
+const bestTimeText = document.getElementById("bestTimeText");
 const restartButton = document.getElementById("restartButton");
 const muteButton = document.getElementById("muteButton");
 let suaraMute = false;
@@ -75,8 +77,67 @@ let waktu = 90;
 let intervalTimer = null;
 let waktuKebal = 0;
 let waktuFrameLalu = 0;
+let totalWaktuBermain = 0;
+let mulaiWaktuPercobaan = 0;
+let waktuTerbaik = 0;
 
-// Aset lokal: tetap bisa dipakai saat index.html dibuka langsung.
+function bacaWaktuTerbaik() {
+  try {
+    let tersimpan = Number(localStorage.getItem("iceSliderBestTime"));
+    if (Number.isFinite(tersimpan) && tersimpan > 0) waktuTerbaik = tersimpan;
+  } catch (error) {
+  }
+  tampilkanWaktuTerbaik();
+}
+
+function tampilkanWaktuTerbaik() {
+  if (waktuTerbaik === 0) {
+    bestTimeText.textContent = "Belum ada rekor";
+    return;
+  }
+  let totalDetik = Math.floor(waktuTerbaik / 1000);
+  let menit = Math.floor(totalDetik / 60);
+  let detik = totalDetik % 60;
+  let desimal = Math.floor((waktuTerbaik % 1000) / 100);
+  bestTimeText.textContent = menit + ":" + (detik < 10 ? "0" : "") + detik + "." + desimal;
+}
+
+function catatWaktuPercobaan() {
+  if (gameState === "playing") {
+    let sekarang = performance.now();
+    totalWaktuBermain += sekarang - mulaiWaktuPercobaan;
+    mulaiWaktuPercobaan = sekarang;
+  }
+}
+
+function simpanWaktuTerbaik() {
+  if (totalWaktuBermain <= 0) return;
+  if (waktuTerbaik === 0 || totalWaktuBermain < waktuTerbaik) {
+    waktuTerbaik = totalWaktuBermain;
+    try {
+      localStorage.setItem("iceSliderBestTime", String(waktuTerbaik));
+    } catch (error) {
+    }
+  }
+}
+
+function kembaliKeStart() {
+  gameState = "start";
+  levelSekarang = 0;
+  totalWaktuBermain = 0;
+  muatLevel();
+  menuTitle.textContent = "ICE SLIDER";
+  menuEyebrow.textContent = "READY TO SLIDE?";
+  menuDescription.textContent = "Meluncurlah di atas es, hindari obstacle, dan kumpulkan 5 bintang sebelum waktu habis.";
+  menuButton.textContent = "Start Game →";
+  menuHint.textContent = "WASD / tombol panah / swipe untuk meluncur";
+  tampilkanWaktuTerbaik();
+  bestTimePanel.hidden = false;
+  menu.hidden = false;
+  restartButton.disabled = true;
+  menuButton.focus();
+}
+
 const gambarKarakter = new Image();
 gambarKarakter.src = "images/Player.png";
 const gambarLubang = new Image();
@@ -166,8 +227,11 @@ function muatLevel() {
 }
 
 function mulaiGame() {
+  catatWaktuPercobaan(); // Waktu sebelum restart tetap masuk total.
   muatLevel();
   gameState = "playing";
+  mulaiWaktuPercobaan = performance.now();
+  bestTimePanel.hidden = true;
   putarSuara(musikBgm);
   menu.hidden = true;
   restartButton.disabled = false;
@@ -293,11 +357,13 @@ function cekObstacle() {
 }
 
 function cekMenang() {
+  if (gameState !== "playing") return;
   if (map[player.y][player.x] !== "E") return;
   if (jumlahBintang < 5) {
     statusText.textContent = "Igloo belum muncul. Kumpulkan seluruh 5 bintang dahulu.";
     return;
   }
+  catatWaktuPercobaan();
   gameState = "win";
   hentikanSuara(musikBgm);
   putarSuara(suaraMenang);
@@ -305,17 +371,19 @@ function cekMenang() {
   clearInterval(intervalTimer);
   intervalTimer = null;
   let levelTerakhir = levelSekarang === semuaLevel.length - 1;
+  if (levelTerakhir) simpanWaktuTerbaik();
   menuTitle.textContent = levelTerakhir ? "YOU WIN!" : "LEVEL COMPLETE!";
   menuEyebrow.textContent = levelTerakhir ? "ALL THREE LEVELS COMPLETE" : "NICE SLIDING!";
   menuDescription.textContent = "Bintang: 5 / 5. "
     + (levelTerakhir ? "Ketiga level berhasil ditaklukkan!" : "Siap menjelajahi maze es berikutnya?");
-  menuButton.textContent = levelTerakhir ? "Start Game" : "Next Level →";
+  menuButton.textContent = levelTerakhir ? "Kembali ke Start" : "Next Level →";
   menuHint.textContent = "Sisa waktu: " + waktu + " detik · HP: " + hp;
   menu.hidden = false;
   menuButton.focus();
 }
 
 function gameOver(pesan) {
+  catatWaktuPercobaan();
   gameState = "lose";
   hentikanSuara(musikBgm);
   putarSuara(suaraKalah);
@@ -499,12 +567,16 @@ canvas.addEventListener("touchcancel", function () {
 menuButton.addEventListener("click", function () {
   if (gameState === "win") {
     if (levelSekarang < semuaLevel.length - 1) levelSekarang++;
-    else levelSekarang = 0;
+    else {
+      kembaliKeStart();
+      return;
+    }
   }
   mulaiGame();
 });
 restartButton.addEventListener("click", restartGame);
 muteButton.addEventListener("click", ubahMute);
 
+bacaWaktuTerbaik();
 muatLevel();
 requestAnimationFrame(update);
