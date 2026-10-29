@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICE SLIDER</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="game.js" defer></script>
+  </head>
+
+  <body>
+    <main class="game-shell">
+      <!-- Judul dan tombol pengaturan -->
+      <header class="header">
+        <div>
+          <p class="eyebrow">A FROZEN LITTLE ADVENTURE</p>
+          <h1>ICE <span>SLIDER</span></h1>
+        </div>
+
+        <div class="header-buttons">
+          <button
+            id="muteButton"
+            class="button secondary"
+            aria-pressed="false"
+            aria-keyshortcuts="M"
+            title="Matikan atau nyalakan suara (M)"
+          >
+            Mute (M)
+          </button>
+          <button id="restartButton" class="button secondary" disabled>
+            ↻ Restart
+          </button>
+        </div>
+      </header>
+
+      <!-- HUD: informasi permainan -->
+      <section class="hud" aria-label="Status permainan">
+        <div>
+          <span class="label">LEVEL</span>
+          <strong id="levelText">01 <small>/ 03</small></strong>
+        </div>
+
+        <div>
+          <span class="label">TIME LEFT</span>
+          <strong id="timerText">01:30</strong>
+        </div>
+
+        <div>
+          <span class="label">LIVES</span>
+          <strong id="hpText" class="health">♥ ♥ ♥</strong>
+        </div>
+
+        <div>
+          <span class="label">STARS</span>
+          <strong id="starsText" class="stars">★ 0 <small>/ 5</small></strong>
+        </div>
+      </section>
+
+      <!-- Canvas dan menu permainan -->
+      <div class="board-frame">
+        <canvas
+          id="gameCanvas"
+          width="768"
+          height="576"
+          aria-label="Maze es. Gunakan WASD, tombol panah, atau swipe untuk meluncur."
+        >
+        </canvas>
+
+        <section id="menu" class="overlay" aria-labelledby="menuTitle">
+          <div class="menu-card">
+            <div class="snowflake" aria-hidden="true">❄</div>
+            <p id="menuEyebrow" class="eyebrow">READY TO SLIDE?</p>
+            <h2 id="menuTitle">ICE SLIDER</h2>
+
+            <p id="menuDescription">
+              Meluncurlah di atas es, hindari obstacle, dan kumpulkan 5 bintang sebelum waktu habis.
+            </p>
+
+            <button id="menuButton" class="button primary">
+              Start Game <span>→</span>
+            </button>
+            <p id="menuHint" class="menu-hint">
+              WASD / tombol panah / swipe untuk meluncur
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <!-- Pesan status dan nomor arena -->
+      <div class="board-caption">
+        <span id="statusText" role="status">
+          Lima bintang. Satu igloo. Ayo meluncur!
+        </span>
+        <span>ICE FIELD / <b id="fieldText">01</b></span>
+      </div>
+
+      <!-- Petunjuk kontrol dan keterangan simbol -->
+      <footer class="instructions">
+        <div class="controls">
+          <span class="key">W</span>
+          <span class="key">A</span>
+          <span class="key">S</span>
+          <span class="key">D</span>
+          <span class="control-copy">
+            atau <b>↑ ↓ ← →</b><br>
+            <small>HP: swipe di arena untuk meluncur</small>
+          </span>
+        </div>
+
+        <div class="legend">
+          <span><i class="legend-star">★</i> Kumpulkan 5 bintang</span>
+          <span><i class="legend-spike">▲</i> Spike −1 HP</span>
+          <span><i class="legend-hole">●</i> Lubang: -1 HP dan kembali ke awal</span>
+          <span><i class="legend-exit">▣</i> Igloo muncul: 5 bintang</span>
+        </div>
+      </footer>
+    </main>
+  </body>
+</html>
